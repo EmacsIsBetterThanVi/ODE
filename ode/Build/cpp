@@ -1,0 +1,22 @@
+#!/bin/bash
+verbose=false
+compile=true
+delete=true
+if [[ $1 == "-n" || $1 == "--no-compile" ]]; then
+compile=false
+shift
+if [[ $1 == "-v" || $1 == "--verbose" ]]; then
+verbose=true
+shift
+fi
+if [[ $1 == "-k" || $1 == "--keep" ]]; then
+delete=false
+shift
+fi
+$ODE_DIR/ode/Build/.cpp
+if [[ $compile == true ]]; then
+g++ -o $1.bin ${@: 2} $ODE_DIR/ode/Build/.cache/$1.ode.cpp
+if [[ $delete == true ]]; then
+rm $ODE_DIR/ode/Build/.cache/*.ode.cpp
+fi
+fi

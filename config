@@ -1,0 +1,6 @@
+#!/bin/bash
+g++ -o ode.bin ode.cpp
+for f in $(ls ode/Build/.*.cpp); do
+g++ -o ${f%.*} $f
+done
+#echo "ODE_DIR=$PWD" >> ode.sh

@@ -1,0 +1,4 @@
+*.ode
+*.mkpkg
+ODE.xcodeproj
+.DS_Store
