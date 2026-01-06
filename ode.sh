@@ -1,5 +1,7 @@
 #!/bin/bash
+# DEPRECATED
 function ode(){
+    echo "This method is deprecated"
 if [[ $1 == "-v" || $1 == "--version" ]]; then
 echo "ODE Binary 0.85.625"
 echo "INTERFACE VERSIONS"
@@ -61,6 +63,7 @@ fi
 fi
 }
 function ode_config(){
+    echo "This method is deprecated"
     bash config
     ODE_DIR=$PWD
 }
