@@ -101,6 +101,9 @@ string Context::get_variable(string name) {
   }
   return LocalVARS.dget(i);
 }
+Thread Context::parent(){
+  return threads[this->t]
+}
 void control_C(int signum){
     stop=true;
     cerr << "\nProcess killed by user\n";
