@@ -6,10 +6,19 @@
 #include <glob.h>
 #include <string>
 #include <unistd.h>
+#include <cstdlib>
 using namespace std;
 bool stop = false;
 string ode_dir;
 maxlist GlobalVARS;
+class Thread;
+class Context;
+int thread_count=0;
+string get_G_variable(string name){
+  return "";
+}
+void set_G_variable(string name, string value, string type){
+}
 class Context {
 private:
   maxlist LocalVARS;
@@ -38,14 +47,16 @@ public:
     254 - Context Returned(function)
     255 - Context exited(Non-function)
    */
-  int run();
-  void set_variable(string, string, string);
+  void set_variable(string name, string value, string type){
+  }
   string get_variable(string);
   int get_line_number() { return line; }
   string get_line() { return Code.dget(line); }
   void set_line(int l) {
     line = l;
   }
+  Thread parent();
+  int run();
 };
 class Thread {
 private:
@@ -72,6 +83,8 @@ public:
     }
     return ThreadVARS.dget(i);
   }
+  void set_variable(string name, string value, string type){
+  }
   bool is_running() { return run; }
   int get_line_number() { return contextStack.top().get_line_number(); }
   string get_line(){ return contextStack.top().get_line(); }
@@ -90,10 +103,6 @@ public:
   }
 };
 Thread threads[100];
-int thread_count=0;
-int Context::run() {
-  // Access my thread: threads[this->t];
-}
 string Context::get_variable(string name) {
   int i = LocalVARS.iget(name);
   if (i == 0) {
@@ -101,8 +110,11 @@ string Context::get_variable(string name) {
   }
   return LocalVARS.dget(i);
 }
-Thread Context::parent(){
-  return threads[this->t]
+Thread Context::parent() {
+  return threads[this->t];
+}
+int Context::run(){
+  return 0;
 }
 void control_C(int signum){
     stop=true;
@@ -171,10 +183,6 @@ int exe(){
 }
 int main(int argc, char* argv[]){
     signal(SIGINT,control_C);
-    if(argc==1){
-        cerr << "MISSING ODE DIRECTORY";
-        return 8;
-    }
     GlobalVARS = maxlist(200000);
     bool INFO = true;
     if (argc >= 3) {
@@ -187,7 +195,8 @@ int main(int argc, char* argv[]){
     cout << "LOADING BUILT IN CLASSES\n";
     cout << "DONE\n";
     int error = 0;
-    ode_dir = argv[1];
+    ode_dir = string(getenv("HOME"))+"/.ode";
+    cout << ode_dir;
     if(argc==2 || (argc == 3 && !INFO)){
       thread_init("REPL");
       stop = false;
