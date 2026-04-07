@@ -10,7 +10,6 @@ Thread::Thread(int id, string file) {
   contextStack = stack<Context>();
   
   contextStack.push(Context(0, code, this->id));
-  line = 0;
   run = true;
 }
 string Thread::get_variable(string name) {
@@ -27,14 +26,13 @@ int Thread::get_line_number() { return contextStack.top().get_line_number(); }
 string Thread::get_line(){ return contextStack.top().get_line(); }
 int Thread::exec() {
   int v = contextStack.top().run();
-  if (v == 255)
-    line = contextStack.top().get_line_number()+1;
-  if (v == 254) line++;
-  if (v == 255 || v == 254) {
+  
+  if (v == 255) {
+    delete &(contextStack.top());
     contextStack.pop();
-    contextStack.top().set_line(line);
     if (contextStack.empty()) run = false;
+    else contextStack.top().next_line();
     return 0;
-  }
+  } else if (v==0) contextStack.top().next_line();
   return v;
 }

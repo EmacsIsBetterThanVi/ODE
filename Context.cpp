@@ -27,3 +27,6 @@ Thread Context::parent() {
 int Context::run(){
   return 0;
 }
+void Context::next_line(){
+  line++;
+}

@@ -6,6 +6,8 @@
 #include <glob.h>
 #include <unistd.h>
 #include <cstdlib>
+/* Because ODE is reliant on setjmp for handling errors, only permanant data structures can be non-local.*/
+#include <setjmp.h>
 class Thread;
 class Context;
 #include "maxlist.h"
@@ -16,12 +18,11 @@ bool stop = false;
 string ode_dir;
 maxlist GlobalVARS;
 int thread_count=0;
+jmp_buf except;
 string get_G_variable(string name){
   int i = GlobalVARS.iget(name);
-  if (i == 0) {
-    longjmp()
-  }
-  return ThreadVARS.dget(i);
+  if (i == 0) longjmp(except, 5);
+  return GlobalVARS.dget(i);
 }
 //TODO: DEFINE VARIABLE SETTERS
 void set_G_variable(string name, string value, string type){
@@ -45,7 +46,7 @@ int exe(){
             ran_thread=true;
             int error;
             try{
-	      error = threads[i].exec();
+	      if (!(error=setjmp(except))) error = threads[i].exec();
             } catch(...){
                 cerr << "Ode Crashed Executing Line "+to_string(threads[i].get_line_number())+" in thread " + to_string(i) + "\n" + threads[i].get_line()<<"\n";
                 return 256;
@@ -65,21 +66,15 @@ int exe(){
                         cerr << "Syntax Error: EOL before termination on line "+ to_string(threads[i].get_line_number())+" in thread "+to_string(i)+"\n"+threads[i].get_line()<<"\n";
                         break;
                     case 5:
-                        cerr << "Variable Error: Request for nonexistant variable made on line "+ to_string(threads[i].get_line_number())+" in thread "+to_string(i)+"\n"+threads[i].get_line()<<"\n";
+                        cerr << "Variable Error: Request for non-existant variable made on line "+ to_string(threads[i].get_line_number())+" in thread "+to_string(i)+"\n"+threads[i].get_line()<<"\n";
                         break;
                     case 6:
-                        cerr << "Variable Error: Illigal request for variable made on line "+ to_string(threads[i].get_line_number())+" in thread "+to_string(i)+"\n"+threads[i].get_line()<<"\n";
-                        break;
-                    case 9:
                         cerr << "Syntax Error: Function decleration in code block starting at "+ to_string(threads[i].get_line_number())+" in thread "+to_string(i)+"\n"+threads[i].get_line()<<"\n";
                         break;
-                    case 10:
-                        cerr << "Operator Error: Unknown operator used on line "+ to_string(threads[i].get_line_number())+" in thread "+to_string(i)+"\n"+threads[i].get_line()<<"\n";
-                        break;
-                    case 12:
+                    case 7:
                         cerr << "Call Error: Attempt to call non-function object on line "+ to_string(threads[i].get_line_number())+" in thread "+to_string(i)+"\n"+threads[i].get_line()<<"\n";
                         break;
-                    case 13:
+                    case 8:
                         cerr << "Call Error: Attempt to call non-object value on line "+ to_string(threads[i].get_line_number())+" in thread "+to_string(i)+"\n"+threads[i].get_line()<<"\n";
                         break;
                 }

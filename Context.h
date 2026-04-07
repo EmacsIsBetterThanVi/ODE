@@ -24,8 +24,7 @@ public:
     10  - Unknown Operator
     12  - Attempt to call non-function object
     13  - Attempt to access property of a primitive
-    254 - Context Returned(function)
-    255 - Context exited(Non-function)
+    255 - Context returned
    */
   void set_variable(string name, string value, string type);
   string get_variable(string);
@@ -33,6 +32,7 @@ public:
   string get_line();
   void set_line(int l);
   Thread parent();
+  void next_line();
   int run();
 };
 #endif

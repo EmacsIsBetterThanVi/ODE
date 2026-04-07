@@ -9,7 +9,6 @@ class Thread {
 private:
   stack<Context> contextStack;
   bool run;
-  int line;
   int id;
   maxlist ThreadVARS;
   maxlist code;
