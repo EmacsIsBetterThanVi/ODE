@@ -1,3 +1,5 @@
 # ODE
 Ode is an interpreted, dynamicaly typed programming language writen in C++, and designed to be able to be compiled in some situations as well.
 Ode is mostly writen as low level funtions, which are then called using higher level functions and classes.
+## Language
+Ode is built around a modal of low level functions performing everything. At its base, Ode has only a few behaviors, all of which are syntactical. Ode however defines a bunch of specifc variables which do specific actions when changed. The behaviors are: <code>name(...)</code> calls function named "name" from the local, thread, or global scope. <code>name{...}</code> defines an object in the specified scope with members in the brackets. <code>name:type{...}</code> defines an object in the specified scope parented by type with members in the brackets. In Ode everything is an object, so to define an integer named x with value 1, one need only do <code>x{1}</code>. Not defining a key means that it is not a member, but rather a direct value. Thus <code>x{1}\nprint(x)</code> would print 1.
