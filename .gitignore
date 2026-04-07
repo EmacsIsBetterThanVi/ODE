@@ -1,4 +1,5 @@
-*.ode
+ode.bin
 *.mkpkg
 ODE.xcodeproj
 .DS_Store
+*.o

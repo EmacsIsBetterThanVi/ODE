@@ -2,120 +2,31 @@
 #include <stack>
 #include <fstream>
 #include <signal.h>
-#include "data.cpp"
-#include <glob.h>
 #include <string>
+#include <glob.h>
 #include <unistd.h>
 #include <cstdlib>
+class Thread;
+class Context;
+#include "maxlist.h"
+#include "Context.h"
+#include "Thread.h"
 using namespace std;
 bool stop = false;
 string ode_dir;
 maxlist GlobalVARS;
-class Thread;
-class Context;
 int thread_count=0;
 string get_G_variable(string name){
-  return "";
+  int i = GlobalVARS.iget(name);
+  if (i == 0) {
+    longjmp()
+  }
+  return ThreadVARS.dget(i);
 }
+//TODO: DEFINE VARIABLE SETTERS
 void set_G_variable(string name, string value, string type){
 }
-class Context {
-private:
-  maxlist LocalVARS;
-  int line;
-  int t;
-  maxlist Code;
-public:
-  Context() {}
-  Context(int l, maxlist code, int thread) {
-    LocalVARS = maxlist(200000);
-    Code = code;
-    line = l;
-    t = thread;
-  }
-  /*
-    return values:
-    0   - OK
-    1   - Unmatched (
-    2   - Unmatched )
-    3   - Unmatched "
-    4   - EOL
-    5   - Undefined Access
-    10  - Unknown Operator
-    12  - Attempt to call non-function object
-    13  - Attempt to access property of a primitive
-    254 - Context Returned(function)
-    255 - Context exited(Non-function)
-   */
-  void set_variable(string name, string value, string type){
-  }
-  string get_variable(string);
-  int get_line_number() { return line; }
-  string get_line() { return Code.dget(line); }
-  void set_line(int l) {
-    line = l;
-  }
-  Thread parent();
-  int run();
-};
-class Thread {
-private:
-  stack<Context> contextStack;
-  bool run;
-  int line;
-  int id;
-  maxlist ThreadVARS;
-  maxlist code;
-public:
-  Thread() {}
-  Thread(int id, string file) {
-    this->id = id;
-    contextStack = stack<Context>();
-    
-    contextStack.push(Context(0, code, this->id));
-    line = 0;
-    run = true;
-  }
-  string get_variable(string name) {
-    int i = ThreadVARS.iget(name);
-    if (i == 0) {
-      return get_G_variable(name);
-    }
-    return ThreadVARS.dget(i);
-  }
-  void set_variable(string name, string value, string type){
-  }
-  bool is_running() { return run; }
-  int get_line_number() { return contextStack.top().get_line_number(); }
-  string get_line(){ return contextStack.top().get_line(); }
-  int exec() {
-    int v = contextStack.top().run();
-    if (v == 255)
-      line = contextStack.top().get_line_number()+1;
-    if (v == 254) line++;
-    if (v == 255 || v == 254) {
-      contextStack.pop();
-      contextStack.top().set_line(line);
-      if (contextStack.empty()) run = false;
-      return 0;
-    }
-    return v;
-  }
-};
 Thread threads[100];
-string Context::get_variable(string name) {
-  int i = LocalVARS.iget(name);
-  if (i == 0) {
-    return threads[this->t].get_variable(name);
-  }
-  return LocalVARS.dget(i);
-}
-Thread Context::parent() {
-  return threads[this->t];
-}
-int Context::run(){
-  return 0;
-}
 void control_C(int signum){
     stop=true;
     cerr << "\nProcess killed by user\n";
@@ -185,26 +96,30 @@ int main(int argc, char* argv[]){
     signal(SIGINT,control_C);
     GlobalVARS = maxlist(200000);
     bool INFO = true;
-    if (argc >= 3) {
+    bool OPS = false;
+    if (argc >= 2) {
       INFO = false;
-      if (strcmp(argv[2], "-v")) {
-	INFO = true;
+      if (argv[1][0] == '-') {
+        OPS=true;
+        INFO = strchr(argv[1], 'v') != NULL;
       }
-    }    
+    }
+  if (INFO){
     cout << "ODE Binary 0.0.0\n";
     cout << "LOADING BUILT IN CLASSES\n";
-    cout << "DONE\n";
+  }
+  if (INFO) cout << "DONE\n";
     int error = 0;
-    ode_dir = string(getenv("HOME"))+"/.ode";
-    cout << ode_dir;
-    if(argc==2 || (argc == 3 && !INFO)){
+    ode_dir = string(getenv("HOME"))+"/.ode/";
+    if (INFO) cout << "ODE DIRECTORY: " << ode_dir << "\n";
+    if(argc==1 || (argc == 2 && OPS)){
       thread_init("REPL");
       stop = false;
       while (error == 0 && !stop) {
 	error=exe();
       }
     } else{
-        thread_init(argv[2]);
+        thread_init((OPS) ? argv[2] : argv[1]);
         stop=false;
         while(error==0 && !stop){
             error=exe();
