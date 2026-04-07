@@ -11,5 +11,11 @@ all: ode
 ode: $(OFILES)
 	g++ -o ode.bin *.o
 
+install-files:
+	cp -fR ./ode ~/.ode
+
+install: install-files ode
+	cp ode.bin /bin/ode
+
 clean:
 	rm -f *.o ode.bin

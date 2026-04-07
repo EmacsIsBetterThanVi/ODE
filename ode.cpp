@@ -6,7 +6,7 @@
 #include <glob.h>
 #include <unistd.h>
 #include <cstdlib>
-/* Because ODE is reliant on setjmp for handling errors, only permanant data structures can be non-local.*/
+// ODE WILL exit when longjmp except ocurs, and thus it does not need special handles
 #include <setjmp.h>
 class Thread;
 class Context;
